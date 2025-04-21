@@ -117,11 +117,15 @@ Frontend is deployed separately. The backend (except SQL endpoints) is deployed 
 - SQL data is handled locally.
 - MongoDB is used for menu management and is fully deployed.
 - You may request the SQL table schemas if needed for review.
+  
+### My Database Design Choices
+
 | Data Type       | Database Used | Reason                                                             |
 |------------------|----------------|--------------------------------------------------------------------|
 | Menu Items       | MongoDB        | Flexible schema, unstructured data, optimized for read operations |
 | Users            | MySQL (SQL)    | Structured data, strong relational integrity                      |
 | Orders           | MySQL (SQL)    | Requires foreign key relationships, transactional consistency     |
+
 
 
 ---
