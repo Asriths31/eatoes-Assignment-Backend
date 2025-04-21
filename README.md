@@ -25,17 +25,6 @@ npm install
 
 ---
 
-## ⚙️ Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-```
-
----
-
 ## 🧩 MongoDB Schema (Menu Items)
 
 Stored in a collection for different categories like **Appetizers**, **Main Course**, and **Desserts**.
