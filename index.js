@@ -7,6 +7,7 @@ const app=express()
 app.use(express.json())
 app.use(cors())
 const uri=process.env.uri
+const port=process.env.port||2000
 mongoose.connect(uri)
 .then((msg)=>console.log("connected"))
 .catch((err)=>console.log(err))
@@ -19,10 +20,16 @@ let menuSchema={
     price:Number,
     image:String
 }
+let userSchema={
+    name:String,
+    phone:String,
+    orders:[{id:String,name:String,description:String,price:Number,image:String}]
+}
 
 let appetisers=mongoose.model("appetisers",menuSchema)
 let mainCourse=mongoose.model("mainCourse",menuSchema)
 let desserts=mongoose.model("desserts",menuSchema)
+let users=mongoose.model("users",userSchema)
 app.get("/",async(req,res)=>{
     let items=await mainCourse.find({})
     res.send(items)
@@ -50,4 +57,52 @@ app.post("/addItem",(req,res)=>{
       .catch((err)=>console.log(err))
 })
 
-app.listen(2000,console.log("started"))
+app.post("/signIn",async(req,res)=>{
+    // console.log(req.body)
+    let body=req.body
+    let user= await users.find({phone:body.phone_no})
+    // console.log("user",user)
+
+    if(user.length>0){
+        console.log(user[0].orders)
+        body.orders.forEach(order => {
+            users.updateOne({phone:body.phone_no},{$set:{
+                orders:[...user[0].orders,{
+                id:order.id,name:order.name,description:order.description,price:order.price,image:order.image
+                }]
+            }}).then((succ)=>{
+                console.log(succ)
+                res.send(user[0])}
+        )
+            .catch((err)=>console.log(err))
+            console.log(order)
+        });
+    }
+    else{
+        res.send("user not found")
+    }
+})
+
+app.post("/signUp",async(req,res)=>{
+    let body=req.body
+    let user1=new users(
+        { name:body.name,
+         phone:body.phone_no,
+         orders:body.orders}
+     )
+     user1.save()
+     .then((out)=>{console.log(out)
+        res.send("registered successfully")
+    })
+     .catch((err)=>console.log(err))
+})
+
+
+app.get("/history/:phone",(req,res)=>{
+    const {phone}=req.params
+    console.log(req.params)
+    users.find({phone:phone})
+    .then((out)=>res.send(out))
+})
+
+app.listen(port,console.log("started"))
