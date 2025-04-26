@@ -7,6 +7,7 @@ const app=express()
 app.use(express.json())
 app.use(cors())
 const uri=process.env.uri
+
 const port=process.env.port||2000
 mongoose.connect(uri)
 .then((msg)=>console.log("connected"))
@@ -21,9 +22,10 @@ let menuSchema={
     image:String
 }
 let userSchema={
+
     name:String,
     phone:String,
-    orders:[{id:String,name:String,description:String,price:Number,image:String}]
+    orders:[{quantity:Number,item:{id:String,name:String,description:String,price:Number,image:String}}]
 }
 
 let appetisers=mongoose.model("appetisers",menuSchema)
@@ -64,18 +66,18 @@ app.post("/signIn",async(req,res)=>{
     // console.log("user",user)
 
     if(user.length>0){
-        console.log(user[0].orders)
+        // console.log(user[0].orders)
         body.orders.forEach(order => {
             users.updateOne({phone:body.phone_no},{$set:{
-                orders:[...user[0].orders,{
-                id:order.id,name:order.name,description:order.description,price:order.price,image:order.image
-                }]
+                orders:[...user[0].orders,{quantity:body.orders[0].quantity,item:{
+                id:body.orders[0].item.id,name:body.orders[0].item.name,description:body.orders[0].item.description,price:body.orders[0].item.price,image:body.orders[0].item.image
+                }}]
             }}).then((succ)=>{
                 console.log(succ)
                 res.send(user[0])}
         )
             .catch((err)=>console.log(err))
-            console.log(order)
+            // console.log(order)
         });
     }
     else{
@@ -85,10 +87,11 @@ app.post("/signIn",async(req,res)=>{
 
 app.post("/signUp",async(req,res)=>{
     let body=req.body
+    // console.log(body)
     let user1=new users(
         { name:body.name,
          phone:body.phone_no,
-         orders:body.orders}
+         orders:body.orders[0]}
      )
      user1.save()
      .then((out)=>{console.log(out)
@@ -100,7 +103,7 @@ app.post("/signUp",async(req,res)=>{
 
 app.get("/history/:phone",(req,res)=>{
     const {phone}=req.params
-    console.log(req.params)
+    // console.log(req.params)
     users.find({phone:phone})
     .then((out)=>res.send(out))
 })
